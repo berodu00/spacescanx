@@ -201,23 +201,43 @@ export default function FloorplanRenderer({
                         if (isWindow) { strokeColor = '#60a5fa'; strokeWidth = 3 }
                         else if (isDoor) { strokeColor = '#fbbf24'; strokeWidth = 3 }
 
+                        // Calculate Center and Length
+                        const midX = (wall.start[0] + wall.end[0]) / 2
+                        const midY = (wall.start[1] + wall.end[1]) / 2
+                        const length = Math.sqrt(
+                            Math.pow(wall.end[0] - wall.start[0], 2) +
+                            Math.pow(wall.end[1] - wall.start[1], 2)
+                        )
+
                         return (
-                            <line
-                                key={`wall-${i}`}
-                                x1={wall.start[0]} y1={wall.start[1]}
-                                x2={wall.end[0]} y2={wall.end[1]}
-                                stroke={strokeColor} strokeWidth={strokeWidth}
-                                strokeLinecap="round"
-                                className="hover:stroke-red-500 cursor-pointer transition-colors"
-                            />
+                            <g key={`wall-group-${i}`}>
+                                <line
+                                    x1={wall.start[0]} y1={wall.start[1]}
+                                    x2={wall.end[0]} y2={wall.end[1]}
+                                    stroke={strokeColor} strokeWidth={strokeWidth}
+                                    strokeLinecap="round"
+                                    className="hover:stroke-red-500 cursor-pointer transition-colors"
+                                />
+                                {/* Wall Dimension Label */}
+                                <text
+                                    x={midX} y={midY}
+                                    textAnchor="middle"
+                                    dy={-5}
+                                    fontSize="10"
+                                    fill="#666"
+                                    className="pointer-events-none select-none"
+                                >
+                                    {Math.round(length)}cm
+                                </text>
+                            </g>
                         )
                     })}
                 </g>
 
                 <g id="items">
                     {items.map((item, i) => {
-                        const w = item.width || 60
-                        const h = item.height || 60
+                        const w = item.width
+                        const h = item.height
                         const x = item.position[0] - w / 2
                         const y = item.position[1] - h / 2
 
@@ -235,10 +255,14 @@ export default function FloorplanRenderer({
                                     strokeWidth="2"
                                     className="group-hover:stroke-blue-500 transition-colors"
                                 />
-                                <foreignObject x={-10} y={h / 2 - 10} width={w + 20} height={20} className="overflow-visible pointer-events-none">
-                                    <div className="flex justify-center items-center">
-                                        <span className="bg-white/80 text-[10px] px-1 rounded shadow-sm whitespace-nowrap text-center select-none">
+                                {/* Item Label and Dimensions */}
+                                <foreignObject x={-20} y={h / 2 - 15} width={w + 40} height={40} className="overflow-visible pointer-events-none">
+                                    <div className="flex flex-col justify-center items-center h-full">
+                                        <span className="bg-white/80 text-[10px] px-1 rounded shadow-sm whitespace-nowrap text-center select-none font-medium">
                                             {item.label || item.type}
+                                        </span>
+                                        <span className="bg-white/60 text-[8px] px-1 rounded text-gray-500 whitespace-nowrap text-center select-none">
+                                            {w}x{h}
                                         </span>
                                     </div>
                                 </foreignObject>

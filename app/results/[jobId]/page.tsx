@@ -1,6 +1,7 @@
 import { redis } from '@/lib/redis'
 import { FloorplanData } from '@/types/floorplan'
 import FloorplanEditor from '@/components/FloorplanEditor'
+import JobPoller from '@/components/JobPoller'
 import Link from 'next/link'
 
 interface PageProps {
@@ -33,8 +34,14 @@ export default async function ResultPage({ params }: PageProps) {
         error = 'Failed to load analysis result.'
     }
 
-    // Debug/Fallback: If Redis is empty or analysis failed (e.g. Gemini quota), use Mock Data for demo
-    if (!floorplan) {
+    // Determine if we should show the "Processing" state
+    const isProcessing = jobData && (jobData.status === 'pending' || jobData.status === 'processing')
+    const isFailed = jobData && jobData.status === 'failed'
+
+    // Only fallback to mock if we have NO job data (e.g. direct visit) or it failed (showing demo)
+    // If it's processing, we show the poller instead of the editor with mock data
+    if (!floorplan && !isProcessing && !jobData?.error) {
+        // ... (keep existing mock logic for true fallback/demo cases)
         console.warn("Using Mock Data for display purposes as real data is missing or pending.")
         floorplan = {
             roomShape: 'rectangle',
@@ -48,8 +55,9 @@ export default async function ResultPage({ params }: PageProps) {
                 { start: [0, 200], end: [0, 280], type: 'door' },
             ],
             items: [
-                { type: 'bed', position: [300, 100], label: 'Bed', width: 120, height: 180 },
-                { type: 'desk', position: [50, 50], label: 'Desk', width: 80, height: 60 },
+                { type: 'bed', position: [300, 100], label: 'Bed', width: 120, height: 200, rotation: 90 },
+                { type: 'desk', position: [50, 50], label: 'Desk', width: 120, height: 60, rotation: 0 },
+                { type: 'chair', position: [80, 80], label: 'Chair', width: 50, height: 50, rotation: 180 },
             ]
         }
     }
@@ -74,22 +82,63 @@ export default async function ResultPage({ params }: PageProps) {
             <main className="flex-1 relative overflow-hidden">
                 {error ? (
                     <div className="p-8 text-red-500">{error}</div>
+                ) : isProcessing ? (
+                    <JobPoller jobId={jobId} initialStatus={jobData.status} />
                 ) : (
                     <div className="w-full h-full">
-                        <FloorplanEditor initialData={floorplan} jobId={jobId} />
+                        <FloorplanEditor initialData={floorplan || { /* Minimum fallback */
+                            roomShape: 'rectangle', dimensions: { width: 1, height: 1 }, walls: [], items: []
+                        }} jobId={jobId} />
                     </div>
                 )}
             </main >
 
             {/* Debug Info Overlay */}
-            {
-                jobData && (
-                    <div className="absolute bottom-4 left-4 bg-black/80 text-white p-4 rounded text-xs max-w-sm overflow-auto max-h-48 z-20">
-                        <pre>{JSON.stringify(jobData.status, null, 2)}</pre>
-                        <pre>Duration: {jobData.videoDuration}s</pre>
+            <div className="absolute bottom-4 left-4 z-50 max-w-lg w-full">
+                {/* Status Badge */}
+                <div className="mb-2">
+                    {jobData?.rawOutput ? (
+                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded border border-green-400">
+                            REAL GEMINI DATA
+                        </span>
+                    ) : isProcessing ? (
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded border border-blue-400">
+                            PROCESSING...
+                        </span>
+                    ) : (
+                        <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded border border-yellow-400">
+                            MOCK DATA (Demo)
+                        </span>
+                    )}
+                </div>
+
+                {/* Debug Panel */}
+                <div className="bg-black/80 text-white p-4 rounded text-xs overflow-auto max-h-60 shadow-lg backdrop-blur-sm">
+                    <div className="flex justify-between items-center mb-2 border-b border-gray-600 pb-1">
+                        <span className="font-bold">🔍 Debug Info</span>
+                        <span className={`px-2 py-0.5 rounded ${jobData?.status === 'completed' ? 'bg-green-600' : 'bg-blue-600'}`}>
+                            {jobData?.status || 'unknown'}
+                        </span>
                     </div>
-                )
-            }
+
+                    {jobData?.error && (
+                        <div className="mb-2 p-2 bg-red-900/50 border border-red-500 rounded">
+                            <strong className="text-red-300">Error:</strong> {jobData.error}
+                        </div>
+                    )}
+
+                    <div className="space-y-1">
+                        <p><strong>Job ID:</strong> {jobId}</p>
+                        <p><strong>Duration:</strong> {jobData?.videoDuration || 'N/A'}s</p>
+                        <details className="mt-2">
+                            <summary className="cursor-pointer hover:text-blue-300">View Raw Output</summary>
+                            <pre className="mt-2 p-2 bg-gray-800 rounded whitespace-pre-wrap word-break-all text-gray-300">
+                                {jobData?.rawOutput || 'No raw output available'}
+                            </pre>
+                        </details>
+                    </div>
+                </div>
+            </div>
         </div >
     )
 }

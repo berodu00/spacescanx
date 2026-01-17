@@ -51,10 +51,22 @@ graph LR
 1.  **Clerk CAPTCHA**: 로컬 개발 시 Clerk의 Google 로그인 캡차 문제가 발생하여, 업로드 페이지에서 임시로 로그인을 우회하도록 설정함(`actions/upload.ts`).
 2.  **Next.js 15+ Params**: 동적 라우트(`[jobId]`)에서 `params`가 Promise로 변경됨에 따라 빌드 에러 발생 -> `await params`로 코드 수정 완료.
 
-## 5. 다음 단계 (Next Steps)
+## 6. 최근 해결된 주요 이슈 (Resolved Issues)
+1.  **Gemini Model 404 Error**: `gemini-1.5-flash` 등 일부 모델 별칭이 API에서 인식되지 않는 문제 발생.
+    - *해결*: 최신 프리뷰 모델 **`gemini-2.5-flash-preview-09-2025`**로 변경하여 해결 및 분석 성능 향상.
+2.  **Worker Retry Logic**: 일시적 실패 시 큐에서 사라진 작업을 재시도하기 위해 `debugJobId`를 통한 수동 트리거 로직 추가.
+3.  **Upload Redirect & Processing**: 업로드 후 결과 페이지로 리다이렉트되지 않던 문제 해결.
+    - *해결*: `router.push('/results/[jobId]')` 추가.
+    - *개선*: 개발 환경에서 업로드 직후 Worker를 자동 트리거하도록 `actions/upload.ts` 수정.
+4.  **Pending Status Stuck**: 큐에 쌓인 이전 작업으로 인해 최신 작업이 처리되지 않던 문제.
+    - *해결*: Worker가 큐를 정상적으로 소모하도록 조치 및 Status Polling용 API (`/api/jobs/[jobId]`) 신설.
+5.  **Analysis UX Improvement**: 분석 대기 시간 동안 사용자 피드백 부재.
+    - *해결*: `JobPoller` 컴포넌트 구현. "Analyzing Space..." 로딩 화면 및 자동 새로고침(Polling) 적용.
 
-1.  **렌더링 최적화**: 많은 오브젝트가 있을 때를 대비한 `requestAnimationFrame` 적용 고려.
-2.  **최종 검증 및 배포**: Vercel 등 실제 환경 배포 테스트.
+## 7. 다음 단계 (Next Steps)
+- **Mission 3 (Interactive Renderer) 검증**: 드래그 앤 드롭, 수정사항 저장(Persistence) 기능 수동 테스트.
+
+1.  **최종 검증 및 배포**: Vercel 등 실제 환경 배포 테스트.
 
 ---
 현재 핵심 기능(업로드 -> 분석(Mock) -> 렌더링 -> 편집 -> 저장)의 **End-to-End 흐름**이 모두 연결된 상태입니다.

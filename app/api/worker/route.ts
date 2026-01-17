@@ -58,6 +58,9 @@ export async function POST(request: Request) {
     const text = result.response.text();
     console.log("Gemini Output:", text);
 
+    // [DEBUG] Store raw output
+    job.rawOutput = text
+
     let analysisResult;
     try {
       // Simple cleanup for code blocks if present
@@ -65,12 +68,14 @@ export async function POST(request: Request) {
       analysisResult = JSON.parse(jsonText);
     } catch (e) {
       console.error("JSON Parse Error", e);
-      analysisResult = { raw: text, error: "Failed to parse JSON" };
+      // Don't fail the whole job, just set error in result
+      analysisResult = null
+      job.error = "Failed to parse JSON: " + (e instanceof Error ? e.message : String(e))
     }
 
     // 4. Save result
     job.status = 'completed'
-    job.result = analysisResult
+    job.result = analysisResult // Can be null if parse failed
     job.completedAt = new Date().toISOString()
 
     await redis.set(`job:${jobId}`, JSON.stringify(job))

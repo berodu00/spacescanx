@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { uploadVideoAction } from '@/actions/upload' // You'll need to export this from actions/upload.ts (I did in previous step)
+import { useRouter } from 'next/navigation'
+import { uploadVideoAction } from '@/actions/upload'
 import { useUser, SignInButton } from '@clerk/nextjs'
 
 export default function UploadPage() {
     const { isLoaded, isSignedIn, user } = useUser()
+    const router = useRouter()
     const [file, setFile] = useState<File | null>(null)
     const [status, setStatus] = useState<string>('')
     const [jobId, setJobId] = useState<string>('')
@@ -42,8 +44,9 @@ export default function UploadPage() {
         try {
             const result = await uploadVideoAction(formData)
             if (result.success) {
-                setStatus('Upload successful! Job ID: ' + result.jobId)
+                setStatus('Upload successful! Redirecting...')
                 setJobId(result.jobId as string)
+                router.push(`/results/${result.jobId}`)
             } else {
                 setStatus('Upload failed: ' + result.error)
             }
@@ -83,17 +86,6 @@ export default function UploadPage() {
             {status && (
                 <div className="mt-4 p-4 bg-gray-100 rounded">
                     <p>{status}</p>
-                </div>
-            )}
-
-            {jobId && (
-                <div className="mt-4">
-                    <h2 className="font-semibold">Analysis Status</h2>
-                    <p className="text-sm text-gray-600">
-                        Check the console or Redis for job progress.
-                        <br />
-                        (In a real app, successful upload would trigger a redirect or poll for status)
-                    </p>
                 </div>
             )}
         </div>

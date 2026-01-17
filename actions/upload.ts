@@ -44,6 +44,20 @@ export async function uploadVideoAction(formData: FormData) {
         await redis.set(`job:${jobId}`, JSON.stringify(jobData))
         await redis.expire(`job:${jobId}`, 60 * 60 * 24) // 24 hours retention
 
+        // [DEV TRIGER] Automatically trigger the worker in development
+        // In production, this might be handled by a queue consumer or cron
+        try {
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+            fetch(`${baseUrl}/api/worker`, {
+                method: 'POST',
+                body: JSON.stringify({}),
+                headers: { 'Content-Type': 'application/json' }
+            }).catch(err => console.error("Failed to trigger worker:", err))
+        } catch (e) {
+            // Ignore trigger errors to not fail the upload
+            console.error("Worker trigger failed", e)
+        }
+
         revalidatePath('/')
         return { success: true, url: blob.url, jobId }
     } catch (error) {

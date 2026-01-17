@@ -18,7 +18,11 @@
 - [x] SVG 렌더러 컴포넌트 생성 <!-- id: 10 -->
 - [x] 드래그 & 스냅 로직 구현 (편집 모드) <!-- id: 11 -->
 - [x] 데이터 수정 API 구현 <!-- id: 12 -->
-- [ ] requestAnimationFrame을 이용한 렌더링 최적화 <!-- id: 13 -->
+- [x] requestAnimationFrame을 이용한 렌더링 최적화 <!-- id: 13 -->
 
 ## 배포 (RELEASE)
-- [ ] 최종 검증 및 배포 <!-- id: 14 -->
+- [/] 최종 검증 및 배포 <!-- id: 14 -->
+    - [x] End-to-End Test (Upload -> Analysis -> Result)
+    - [x] Analysis UX (Loading & Polling)
+    - [ ] Mission 3 Interactive Editor Verification
+    - [ ] Deployment to Vercel

@@ -8,11 +8,11 @@ export interface Wall {
 
 export interface Item {
     type: 'bed' | 'desk' | 'chair' | 'unknown' | string
-    position: Point
+    position: Point // Center position [x, y]
     label?: string
-    width?: number
-    height?: number
-    rotation?: number
+    width: number   // Width in cm
+    height: number  // Depth in cm
+    rotation: number // Rotation in degrees (0-360)
 }
 
 export interface FloorplanData {
