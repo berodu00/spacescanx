@@ -8,7 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 // Gemini 1.5 Pro or 3 Pro (depending on availability, usually 1.5 Pro is 'gemini-1.5-pro')
 // Using 'gemini-1.5-pro' for vision capabilities as of 2024/2025 standard
-export const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+export const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-09-2025' })
 
 export const ANALYSIS_PROMPT = `
 Analyze the provided video of a room scan and output a structured JSON plan for a 2D floorplan.

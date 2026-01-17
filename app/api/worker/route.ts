@@ -6,10 +6,19 @@ import { model, ANALYSIS_PROMPT } from '@/lib/gemini'
 // or triggered by Vercel Cron/Queues.
 // For now, we simulate a worker via an API endpoint that processes one item.
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    // 1. Pop job from queue
-    const jobString = await redis.rpop('analysis-queue')
+    const body = await request.json().catch(() => ({}))
+    let jobString
+
+    if (body.debugJobId) {
+      console.log(`Debug Retry for Job: ${body.debugJobId}`)
+      jobString = await redis.get(`job:${body.debugJobId}`)
+    } else {
+      // 1. Pop job from queue
+      jobString = await redis.rpop('analysis-queue')
+    }
+
     if (!jobString) {
       return NextResponse.json({ message: 'No jobs in queue' }, { status: 200 })
     }
@@ -70,6 +79,6 @@ export async function POST() {
 
   } catch (error) {
     console.error('Worker Error:', error)
-    return NextResponse.json({ success: false, error: 'Worker failed' }, { status: 500 })
+    return NextResponse.json({ success: false, error: `Worker failed: ${error instanceof Error ? error.message : String(error)}` }, { status: 500 })
   }
 }

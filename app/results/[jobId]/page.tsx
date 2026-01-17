@@ -4,16 +4,16 @@ import FloorplanEditor from '@/components/FloorplanEditor'
 import Link from 'next/link'
 
 interface PageProps {
-    params: {
+    params: Promise<{
         jobId: string
-    }
+    }>
 }
 
 // Ensure dynamic rendering to fetch latest Redis data
 export const dynamic = 'force-dynamic'
 
 export default async function ResultPage({ params }: PageProps) {
-    const { jobId } = params
+    const { jobId } = await params
 
     let jobData = null
     let floorplan: FloorplanData | null = null
@@ -76,7 +76,7 @@ export default async function ResultPage({ params }: PageProps) {
                     <div className="p-8 text-red-500">{error}</div>
                 ) : (
                     <div className="w-full h-full">
-                        <FloorplanEditor initialData={floorplan} />
+                        <FloorplanEditor initialData={floorplan} jobId={jobId} />
                     </div>
                 )}
             </main >
