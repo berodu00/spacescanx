@@ -8,14 +8,14 @@
 - [x] 프로젝트 구조 설정 (Components, Lib, Utils) <!-- id: 4 -->
 
 ## 미션 2: 분석 파이프라인 (ANALYSIS PIPELINE)
-- [/] Upstash Redis 큐 및 캐시 설정 <!-- id: 5 -->
-- [/] Vercel Blob Storage 구성 <!-- id: 6 -->
-- [/] 비디오 업로드 액션 구현 <!-- id: 7 -->
-- [/] Gemini 3 Pro SDK 연동 <!-- id: 8 -->
-- [/] 분석 작업 워커(Worker) 생성 <!-- id: 9 -->
+- [x] Upstash Redis 큐 및 캐시 설정 <!-- id: 5 -->
+- [x] Vercel Blob Storage 구성 <!-- id: 6 -->
+- [x] 비디오 업로드 액션 구현 <!-- id: 7 -->
+- [x] Gemini 3 Pro SDK 연동 <!-- id: 8 -->
+- [x] 분석 작업 워커(Worker) 생성 <!-- id: 9 -->
 
 ## 미션 3: 인터랙티브 렌더러 (INTERACTIVE RENDERER)
-- [ ] SVG 렌더러 컴포넌트 생성 <!-- id: 10 -->
+- [/] SVG 렌더러 컴포넌트 생성 <!-- id: 10 -->
 - [ ] 드래그 & 스냅 로직 구현 (편집 모드) <!-- id: 11 -->
 - [ ] 데이터 수정 API 구현 <!-- id: 12 -->
 - [ ] requestAnimationFrame을 이용한 렌더링 최적화 <!-- id: 13 -->
